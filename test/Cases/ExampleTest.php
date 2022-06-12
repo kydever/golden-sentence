@@ -11,10 +11,6 @@ declare(strict_types=1);
  */
 namespace HyperfTest\Cases;
 
-use App\Kernel\Context\Coroutine;
-use App\Kernel\Log\AppendRequestIdProcessor;
-use Hyperf\Context\Context;
-use Hyperf\Engine\Channel;
 use HyperfTest\HttpTestCase;
 
 /**

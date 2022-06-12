@@ -5,8 +5,8 @@
 # @contact  group@hyperf.io
 # @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
 
-FROM hyperf/hyperf:8.0-alpine-v3.15-swoole
-LABEL maintainer="Hyperf Developers <group@hyperf.io>" version="1.0" license="MIT" app.name="Hyperf"
+FROM hyperf/hyperf:8.1-alpine-v3.15-swoole
+LABEL maintainer="Hyperf Developers <group@hyperf.io>" version="1.0" license="MIT" app.name="golden_sentence"
 
 ##
 # ---------- env settings ----------
@@ -43,8 +43,8 @@ RUN set -ex \
 WORKDIR /opt/www
 
 # Composer Cache
-# COPY ./composer.* /opt/www/
-# RUN composer install --no-dev --no-scripts
+COPY ./composer.* /opt/www/
+RUN composer install --no-dev --no-scripts
 
 COPY . /opt/www
 RUN composer install --no-dev -o && php bin/hyperf.php

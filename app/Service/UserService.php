@@ -11,12 +11,29 @@ declare(strict_types=1);
  */
 namespace App\Service;
 
+use App\Model\User;
+use App\Service\Dao\UserDao;
 use Han\Utils\Service;
+use Hyperf\Di\Annotation\Inject;
 
 class UserService extends Service
 {
+    #[Inject]
+    protected UserDao $dao;
+
     public function syncFromWeChat(): void
     {
-        
+        $id = (int) env('WORK_DEPARTMENT_ID', 0);
+        $users = di()->get(WeChatService::class)->usersByDepartmentId($id);
+        foreach ($users as $user) {
+            $model = $this->dao->firstByOpenId($user['userid']);
+            if (! $model) {
+                $model = new User();
+                $model->openid = $user['userid'];
+            }
+
+            $model->name = $user['name'];
+            $model->save();
+        }
     }
 }

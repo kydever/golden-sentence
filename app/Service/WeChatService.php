@@ -39,6 +39,7 @@ class WeChatService extends Service
 
     /**
      * 返回部门所有员工.
+     * @return [['userid' => '', 'name' => '']]
      */
     public function usersByDepartmentId(int $id): array
     {

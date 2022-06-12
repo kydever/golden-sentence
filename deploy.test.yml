@@ -5,6 +5,7 @@ services:
     environment:
       - "APP_PROJECT=hyperf"
       - "APP_ENV=test"
+      - "APP_LOG_PHP_OUTPUT=(true)"
     ports:
       - 9501:9501
     deploy:

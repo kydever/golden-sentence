@@ -9,6 +9,7 @@ declare(strict_types=1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
+use App\Constants\LogConstant;
 use App\Kernel\Log;
 
 return [
@@ -16,7 +17,7 @@ return [
         'handler' => [
             'class' => Monolog\Handler\StreamHandler::class,
             'constructor' => [
-                'stream' => BASE_PATH . '/runtime/logs/hyperf.log',
+                'stream' => LogConstant::stream(),
                 'level' => Monolog\Logger::INFO,
             ],
         ],

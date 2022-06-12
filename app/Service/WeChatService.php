@@ -11,15 +11,22 @@ declare(strict_types=1);
  */
 namespace App\Service;
 
+use App\Constants\ErrorCode;
+use App\Constants\Event;
+use App\Exception\BusinessException;
 use EasyWeChat\Work\Application;
+use GuzzleHttp\RequestOptions;
 use Han\Utils\Service;
+use Hyperf\Contract\ConfigInterface;
 use Hyperf\Di\Annotation\Inject;
-use Hyperf\Utils\Codec\Json;
 
 class WeChatService extends Service
 {
     #[Inject]
     protected Application $application;
+
+    #[Inject]
+    protected ConfigInterface $config;
 
     /**
      * 返回所有部门列表.
@@ -30,11 +37,13 @@ class WeChatService extends Service
             'query' => [
                 'id' => 0,
             ],
-        ]);
+        ])->toArray();
 
-        $content = Json::decode($res->getContent(true));
+        if ($res['errcode'] !== 0) {
+            throw new BusinessException(ErrorCode::SERVER_ERROR, $res['errmsg']);
+        }
 
-        return $content['department'] ?? [];
+        return $res['department'] ?? [];
     }
 
     /**
@@ -48,10 +57,54 @@ class WeChatService extends Service
                 'department_id' => $id,
                 'fetch_child' => 1,
             ],
-        ]);
+        ])->toArray();
 
-        $content = Json::decode($res->getContent(true));
+        if ($res['errcode'] !== 0) {
+            throw new BusinessException(ErrorCode::SERVER_ERROR, $res['errmsg']);
+        }
 
-        return $content['userlist'] ?? [];
+        return $res['userlist'] ?? [];
+    }
+
+    public function setMenu(): void
+    {
+        $res = $this->application->getClient()->post('/cgi-bin/menu/create', [
+            RequestOptions::QUERY => [
+                'agentid' => $this->getAgentId(),
+            ],
+            RequestOptions::JSON => [
+                'button' => [
+                    [
+                        'type' => 'view',
+                        'name' => '主页',
+                        'url' => 'https://github.com/kydever/golden-sentence',
+                    ],
+                    [
+                        'name' => '快捷入口',
+                        'sub_button' => [
+                            [
+                                'type' => 'click',
+                                'name' => '本周金句',
+                                'key' => Event::WEEKLY_SENTENCES,
+                            ],
+                            [
+                                'type' => 'click',
+                                'name' => '本周统计',
+                                'key' => Event::WEEKLY_STATISTICS,
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ])->toArray();
+
+        if ($res['errcode'] !== 0) {
+            throw new BusinessException(ErrorCode::SERVER_ERROR, $res['errmsg']);
+        }
+    }
+
+    protected function getAgentId(): int
+    {
+        return $this->config->get('wechat.default.agent_id');
     }
 }

@@ -12,6 +12,7 @@ declare(strict_types=1);
 namespace App\Command;
 
 use App\Service\UserService;
+use App\Service\WeChatService;
 use Hyperf\Command\Annotation\Command;
 use Hyperf\Command\Command as HyperfCommand;
 use Psr\Container\ContainerInterface;
@@ -33,5 +34,7 @@ class InitCommand extends HyperfCommand
     public function handle()
     {
         di()->get(UserService::class)->syncFromWeChat();
+        // 初始化企业微信自定义菜单
+        di()->get(WeChatService::class)->setMenu();
     }
 }

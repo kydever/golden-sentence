@@ -9,7 +9,7 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-latest ]
-        php-version: [ '8.1' ]
+        php-version: [ '8.0', '8.1' ]
         swoole-version: [ 'v4.8.10', 'master' ]
       max-parallel: 5
     env:

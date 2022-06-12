@@ -12,3 +12,6 @@ declare(strict_types=1);
 use Hyperf\HttpServer\Router\Router;
 
 Router::addRoute(['GET', 'POST', 'HEAD'], '/', 'App\Controller\IndexController::index');
+
+Router::get('/wechat/serve', [App\Controller\WeChatController::class, 'serve']);
+Router::post('/wechat/serve', [App\Controller\WeChatController::class, 'serve']);

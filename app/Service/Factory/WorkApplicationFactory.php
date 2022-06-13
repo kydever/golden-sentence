@@ -38,6 +38,7 @@ class WorkApplicationFactory
                         break;
                     case 'event':
                         if ($key = $message->EventKey) {
+                            di()->get(SentenceService::class)->handleEvent($message->FromUserName, $key);
                         }
                         break;
                 }

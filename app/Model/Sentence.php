@@ -17,6 +17,7 @@ namespace App\Model;
  * @property string $content
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
+ * @property User $user
  */
 class Sentence extends Model
 {
@@ -34,4 +35,9 @@ class Sentence extends Model
      * The attributes that should be cast to native types.
      */
     protected array $casts = ['id' => 'integer', 'user_id' => 'integer', 'created_at' => 'datetime', 'updated_at' => 'datetime'];
+
+    public function user()
+    {
+        return $this->hasOne(User::class, 'id', 'user_id');
+    }
 }

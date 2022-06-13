@@ -56,10 +56,16 @@ class SentenceService extends Service
                 break;
             case Event::WEEKLY_SENTENCES:
                 // 返回当周所有金句
+                $users = di()->get(UserDao::class)->all()->getDictionary();
                 $contents = di()->get(SentenceDao::class)->findByCreatedAt($beginAt);
+
                 $content = '';
                 foreach ($contents as $item) {
-                    $content .= $item . PHP_EOL;
+                    if ($user = $users[$item->user_id] ?? null) {
+                        $content .= '作者: ' . $user->name . PHP_EOL;
+                        $content .= '内容: ' . $item->content . PHP_EOL;
+                        $content .= PHP_EOL;
+                    }
                 }
                 $this->wechat->sendText($openid, $content);
                 break;

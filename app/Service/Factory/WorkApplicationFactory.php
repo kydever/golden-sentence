@@ -11,6 +11,7 @@ declare(strict_types=1);
  */
 namespace App\Service\Factory;
 
+use App\Service\SentenceService;
 use EasyWeChat\Work\Application;
 use EasyWeChat\Work\Message;
 use Hyperf\Contract\ConfigInterface;
@@ -32,6 +33,7 @@ class WorkApplicationFactory
                 switch ($message->MsgType) {
                     case 'text':
                         if ($content = $message->Content) {
+                            di()->get(SentenceService::class)->handle($message->FromUserName, $content);
                         }
                         break;
                     case 'event':

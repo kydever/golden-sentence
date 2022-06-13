@@ -19,6 +19,7 @@ use GuzzleHttp\RequestOptions;
 use Han\Utils\Service;
 use Hyperf\Contract\ConfigInterface;
 use Hyperf\Di\Annotation\Inject;
+use JetBrains\PhpStorm\ArrayShape;
 
 class WeChatService extends Service
 {
@@ -66,6 +67,22 @@ class WeChatService extends Service
         return $res['userlist'] ?? [];
     }
 
+    #[ArrayShape(['userid' => 'string', 'name' => 'string'])]
+    public function userInfo(string $openid): array
+    {
+        $res = $this->application->getClient()->get('cgi-bin/user/get', [
+            'query' => [
+                'userid' => $openid,
+            ],
+        ])->toArray();
+
+        if ($res['errcode'] !== 0) {
+            throw new BusinessException(ErrorCode::SERVER_ERROR, $res['errmsg']);
+        }
+
+        return $res;
+    }
+
     public function setMenu(): void
     {
         $res = $this->application->getClient()->post('/cgi-bin/menu/create', [
@@ -95,6 +112,24 @@ class WeChatService extends Service
                         ],
                     ],
                 ],
+            ],
+        ])->toArray();
+
+        if ($res['errcode'] !== 0) {
+            throw new BusinessException(ErrorCode::SERVER_ERROR, $res['errmsg']);
+        }
+    }
+
+    public function sendText(string $openId, string $content): void
+    {
+        $res = $this->application->getClient()->post('/cgi-bin/message/send', [
+            RequestOptions::JSON => [
+                'msgtype' => 'text',
+                'agentid' => $this->getAgentId(),
+                'text' => [
+                    'content' => $content,
+                ],
+                'touser' => $openId,
             ],
         ])->toArray();
 

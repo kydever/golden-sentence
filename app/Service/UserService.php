@@ -36,4 +36,18 @@ class UserService extends Service
             $model->save();
         }
     }
+
+    public function firstByOpenId(string $openid): User
+    {
+        $model = $this->dao->firstByOpenId($openid);
+        if (! $model) {
+            $data = di()->get(WeChatService::class)->userInfo($openid);
+            $model = new User();
+            $model->openid = $data['userid'];
+            $model->name = $data['name'];
+            $model->save();
+        }
+
+        return $model;
+    }
 }

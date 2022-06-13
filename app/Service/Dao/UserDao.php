@@ -13,11 +13,20 @@ namespace App\Service\Dao;
 
 use App\Model\User;
 use Han\Utils\Service;
+use Hyperf\Database\Model\Collection;
 
 class UserDao extends Service
 {
     public function firstByOpenId(string $openid): ?User
     {
         return User::query()->where('openid', $openid)->first();
+    }
+
+    /**
+     * @return Collection<int, User>
+     */
+    public function all()
+    {
+        return User::query()->get();
     }
 }

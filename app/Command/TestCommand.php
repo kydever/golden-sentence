@@ -11,27 +11,27 @@ declare(strict_types=1);
  */
 namespace App\Command;
 
-use App\Service\WeChatService;
+use App\Service\SentenceService;
 use Hyperf\Command\Annotation\Command;
 use Hyperf\Command\Command as HyperfCommand;
 use Psr\Container\ContainerInterface;
 
 #[Command]
-class WeChatCommand extends HyperfCommand
+class TestCommand extends HyperfCommand
 {
     public function __construct(protected ContainerInterface $container)
     {
-        parent::__construct('wechat');
+        parent::__construct('test');
     }
 
     public function configure()
     {
         parent::configure();
-        $this->setDescription('企业微信命令集合');
+        $this->setDescription('测试脚本');
     }
 
     public function handle()
     {
-        di()->get(WeChatService::class)->usersByDepartmentId(4);
+        var_dump(di()->get(SentenceService::class)->getStartDayOfWeek());
     }
 }

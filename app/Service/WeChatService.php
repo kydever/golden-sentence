@@ -14,6 +14,8 @@ namespace App\Service;
 use App\Constants\ErrorCode;
 use App\Constants\Event;
 use App\Exception\BusinessException;
+use EasyWeChat\Kernel\Form\File;
+use EasyWeChat\Kernel\Form\Form;
 use EasyWeChat\Work\Application;
 use GuzzleHttp\RequestOptions;
 use Han\Utils\Service;
@@ -128,6 +130,43 @@ class WeChatService extends Service
                 'agentid' => $this->getAgentId(),
                 'text' => [
                     'content' => $content,
+                ],
+                'touser' => $openId,
+            ],
+        ])->toArray();
+
+        if ($res['errcode'] !== 0) {
+            throw new BusinessException(ErrorCode::SERVER_ERROR, $res['errmsg']);
+        }
+    }
+
+    public function uploadMedia(string $path, ?string $name = null): string
+    {
+        $options = Form::create([
+            'media' => File::fromPath($path, $name),
+        ])->toArray();
+
+        $res = $this->application->getClient()->post('/cgi-bin/media/upload', array_merge([
+            RequestOptions::QUERY => [
+                'type' => 'file',
+            ],
+        ], $options))->toArray();
+
+        if ($res['errcode'] !== 0) {
+            throw new BusinessException(ErrorCode::SERVER_ERROR, $res['errmsg']);
+        }
+
+        return $res['media_id'];
+    }
+
+    public function sendMedia(string $openId, string $mediaId): void
+    {
+        $res = $this->application->getClient()->post('/cgi-bin/message/send', [
+            RequestOptions::JSON => [
+                'msgtype' => 'file',
+                'agentid' => $this->getAgentId(),
+                'file' => [
+                    'media_id' => $mediaId,
                 ],
                 'touser' => $openId,
             ],

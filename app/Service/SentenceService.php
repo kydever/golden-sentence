@@ -12,10 +12,13 @@ declare(strict_types=1);
 namespace App\Service;
 
 use App\Constants\Event;
+use App\Model\Sentence;
+use App\Model\User;
 use App\Service\Dao\SentenceDao;
 use App\Service\Dao\UserDao;
 use Carbon\Carbon;
 use Han\Utils\Service;
+use Hyperf\Database\Model\Collection;
 use Hyperf\Di\Annotation\Inject;
 
 class SentenceService extends Service
@@ -59,15 +62,13 @@ class SentenceService extends Service
                 $users = di()->get(UserDao::class)->all()->getDictionary();
                 $contents = di()->get(SentenceDao::class)->findByCreatedAt($beginAt);
 
-                $content = '';
-                foreach ($contents as $item) {
-                    if ($user = $users[$item->user_id] ?? null) {
-                        $content .= '作者: ' . $user->name . PHP_EOL;
-                        $content .= '内容: ' . $item->content . PHP_EOL;
-                        $content .= PHP_EOL;
-                    }
-                }
-                $this->wechat->sendText($openid, $content);
+                $path = $this->exportCSVToFile($contents, $users);
+
+                $mediaId = $this->wechat->uploadMedia(
+                    $path,
+                    '本周所有金句.csv'
+                );
+                $this->wechat->sendMedia($openid, $mediaId);
                 break;
         }
     }
@@ -76,5 +77,27 @@ class SentenceService extends Service
     {
         $now = $today ?? Carbon::today();
         return $now->subDays($now->dayOfWeek)->toDateTimeString();
+    }
+
+    /**
+     * @param Collection<int, Sentence> $models
+     * @param array<int, User> $users
+     */
+    public function exportCSVToFile(Collection $models, array $users): string
+    {
+        $fileName = BASE_PATH . '/runtime/' . uniqid() . '.csv';
+
+        $stream = fopen($fileName, 'w+');
+        fputcsv($stream, ['作者', '内容']);
+
+        foreach ($models as $item) {
+            if ($user = $users[$item->user_id] ?? null) {
+                $data = [$user->name, $item->content];
+                fputcsv($stream, $data);
+            }
+        }
+        fclose($stream);
+
+        return $fileName;
     }
 }

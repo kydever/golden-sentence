@@ -27,6 +27,6 @@ class UserDao extends Service
      */
     public function all()
     {
-        return User::query()->get();
+        return User::query()->where('is_deleted', 0)->get();
     }
 }

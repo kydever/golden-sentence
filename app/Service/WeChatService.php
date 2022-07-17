@@ -104,7 +104,7 @@ class WeChatService extends Service
                             [
                                 'type' => 'click',
                                 'name' => '本周金句',
-                                'key' => Event::WEEKLY_SENTENCES,
+                                'key' => Event::WEEKLY_SENTENCES_OPTIONS,
                             ],
                             [
                                 'type' => 'click',

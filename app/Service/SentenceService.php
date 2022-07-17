@@ -49,11 +49,11 @@ class SentenceService extends Service
         $card = [
             'card_type' => 'multiple_interaction',
             'source' => [
-                'desc' => '选择',
+                'desc' => '选择时间导出金句',
             ],
             'main_title' => [
                 'title' => '请选择',
-                'desc' => '感谢您为 KY 的付出',
+                'desc' => '感谢您的付出',
             ],
             'task_id' => uniqid(),
             'select_list' => [

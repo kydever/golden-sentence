@@ -16,4 +16,6 @@ class Event
     public const WEEKLY_STATISTICS = 'WEEKLY_STATISTICS';
 
     public const WEEKLY_SENTENCES = 'WEEKLY_SENTENCES';
+
+    public const WEEKLY_SENTENCES_OPTIONS = 'WEEKLY_SENTENCES_OPTIONS';
 }

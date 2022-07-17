@@ -17,6 +17,7 @@ use App\Model\User;
 use App\Service\Dao\SentenceDao;
 use App\Service\Dao\UserDao;
 use Carbon\Carbon;
+use EasyWeChat\Work\Message;
 use Han\Utils\Service;
 use Hyperf\Database\Model\Collection;
 use Hyperf\Di\Annotation\Inject;
@@ -43,7 +44,45 @@ class SentenceService extends Service
         $this->wechat->sendText($openid, '感谢您的无私付出，祝生活愉快');
     }
 
-    public function handleEvent(string $openid, string $event): void
+    public function sendSelectMonthCard(string $openId): void
+    {
+        $card = [
+            'card_type' => 'multiple_interaction',
+            'source' => [
+                'desc' => '选择',
+            ],
+            'main_title' => [
+                'title' => '请选择',
+                'desc' => '感谢您为 KY 的付出',
+            ],
+            'task_id' => uniqid(),
+            'select_list' => [
+                [
+                    'question_key' => 'month_key',
+                    'title' => '请选择日期',
+                    'selected_id' => 'month_id',
+                    'option_list' => [
+                        [
+                            'id' => '0',
+                            'text' => '本周',
+                        ],
+                        [
+                            'id' => '7',
+                            'text' => '上周',
+                        ],
+                    ],
+                ],
+            ],
+            'submit_button' => [
+                'text' => '提交',
+                'key' => Event::WEEKLY_SENTENCES,
+            ],
+        ];
+
+        $this->wechat->sendTemplateCard($openId, $card);
+    }
+
+    public function handleEvent(string $openid, string $event, Message $message): void
     {
         $beginAt = $this->getStartDayOfWeek();
         switch ($event) {
@@ -57,10 +96,18 @@ class SentenceService extends Service
                 }
                 $this->wechat->sendText($openid, $content);
                 break;
+            case Event::WEEKLY_SENTENCES_OPTIONS:
+                $this->sendSelectMonthCard($openid);
+                break;
             case Event::WEEKLY_SENTENCES:
                 // 返回当周所有金句
+                $days = $message->SelectedItems['SelectedItem']['OptionIds']['OptionId'] ?? null;
+                $date = Carbon::today()->subDays((int) $days);
+                $beginAt = $this->getStartDayOfWeek($date);
+                $endAt = $date->addDays(7)->toDateTimeString();
+
                 $users = di()->get(UserDao::class)->all()->getDictionary();
-                $contents = di()->get(SentenceDao::class)->findByCreatedAt($beginAt);
+                $contents = di()->get(SentenceDao::class)->findByCreatedAt($beginAt, $endAt);
 
                 $path = $this->exportCSVToFile($contents, $users);
 
@@ -76,7 +123,7 @@ class SentenceService extends Service
     public function getStartDayOfWeek(?Carbon $today = null): string
     {
         $now = $today ?? Carbon::today();
-        return $now->subDays($now->dayOfWeek)->toDateTimeString();
+        return $now->clone()->subDays($now->dayOfWeek)->toDateTimeString();
     }
 
     /**

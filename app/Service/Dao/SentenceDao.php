@@ -29,9 +29,14 @@ class SentenceDao extends Service
     /**
      * @return Collection<int, Sentence>
      */
-    public function findByCreatedAt(string $createdAt)
+    public function findByCreatedAt(string $createdAt, ?string $endAt = null)
     {
-        return Sentence::query()->where('created_at', '>=', $createdAt)->get();
+        $query = Sentence::query()->where('created_at', '>=', $createdAt);
+        if ($endAt) {
+            $query->where('created_at', '<', $endAt);
+        }
+
+        return $query->get();
     }
 
     /**

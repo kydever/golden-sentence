@@ -159,6 +159,22 @@ class WeChatService extends Service
         return $res['media_id'];
     }
 
+    public function sendTemplateCard(string $openId, array $card): void
+    {
+        $res = $this->application->getClient()->post('/cgi-bin/message/send', [
+            RequestOptions::JSON => [
+                'msgtype' => 'template_card',
+                'agentid' => $this->getAgentId(),
+                'template_card' => $card,
+                'touser' => $openId,
+            ],
+        ])->toArray();
+
+        if ($res['errcode'] !== 0) {
+            throw new BusinessException(ErrorCode::SERVER_ERROR, $res['errmsg']);
+        }
+    }
+
     public function sendMedia(string $openId, string $mediaId): void
     {
         $res = $this->application->getClient()->post('/cgi-bin/message/send', [
